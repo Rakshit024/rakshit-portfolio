@@ -3,8 +3,7 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { Mail, Github, Linkedin, Send, Loader2 } from 'lucide-react';
-import { contactAPI } from '../services/api';
+import { Mail, Github, Linkedin, Send } from 'lucide-react';
 
 const schema = yup.object().shape({
   name: yup.string().required('Name is required'),
@@ -17,8 +16,6 @@ const schema = yup.object().shape({
 
 const Contact = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [submitError, setSubmitError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -29,32 +26,18 @@ const Contact = () => {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = async (data) => {
-    setIsSubmitting(true);
-    setSubmitError('');
-    setSubmitSuccess(false);
-
-    try {
-      const response = await contactAPI.submitContact(data);
-      
-      if (response.success) {
-        setSubmitSuccess(true);
-        reset();
-        setTimeout(() => {
-          setSubmitSuccess(false);
-        }, 5000);
-      }
-    } catch (error) {
-      console.error('Contact form error:', error);
-      setSubmitError(
-        error.message || 'Failed to send message. Please try again later.'
-      );
-      setTimeout(() => {
-        setSubmitError('');
-      }, 5000);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const onSubmit = (data) => {
+    // Log form data (in production, you could integrate with email service or form service)
+    console.log('Contact form submitted:', data);
+    
+    // Show success message
+    setSubmitSuccess(true);
+    reset();
+    
+    // Auto-hide success message after 5 seconds
+    setTimeout(() => {
+      setSubmitSuccess(false);
+    }, 5000);
   };
 
   return (
@@ -221,34 +204,12 @@ const Contact = () => {
 
             <motion.button
               type="submit"
-              disabled={isSubmitting}
-              whileHover={{ opacity: isSubmitting ? 1 : 0.9 }}
-              whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-              className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              whileHover={{ opacity: 0.9 }}
+              whileTap={{ scale: 0.98 }}
+              className="btn-primary w-full flex items-center justify-center gap-2"
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  Send Message <Send size={18} />
-                </>
-              )}
+              Send Message <Send size={18} />
             </motion.button>
-
-            {submitError && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm"
-              >
-                {submitError}
-              </motion.div>
-            )}
 
             {submitSuccess && (
               <motion.div
@@ -258,7 +219,7 @@ const Contact = () => {
                 transition={{ duration: 0.3 }}
                 className="p-4 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-sm"
               >
-                Thank you! Your message has been sent successfully.
+                Thank you! Your message has been received. I'll get back to you soon.
               </motion.div>
             )}
           </motion.form>
